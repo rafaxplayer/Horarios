@@ -1,0 +1,49 @@
+<div class="container-fluid">
+    <ng-template #modalContent let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">{{ periodMsg }}</h4>
+
+            <button type="button" class="close" aria-label="Close" (click)="c('close click')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+
+            <p><strong>{{ dateModal }}</strong></p>
+            <p>{{ hourModal }}</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" (click)="d('save')">Save</button>
+        </div>
+    </ng-template>
+    <div class="navigation row text-center">
+        <div class="col-md-4">
+            <div class="btn-group">
+                <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+                    Previous
+                </div>
+                <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
+                    Today
+                </div>
+                <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+                    Next
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 ">
+            <h2>{{ viewDate | date }}</h2>
+        </div>
+        <div class="col-md-4 " *ngIf="view == 'day'">
+            <button class="btn btn-outline-primary" (click)="view='month'">Mes</button>
+        </div>
+
+    </div>
+
+    <div [ngSwitch]="view">
+        <mwl-calendar-month-view *ngSwitchCase="'month'" [viewDate]="viewDate" [events]="events" (dayClicked)="dayClicked($event.day)">
+        </mwl-calendar-month-view>
+        <mwl-calendar-day-view *ngSwitchCase="'day'" [viewDate]="viewDate" [events]="events" (hourSegmentClicked)="hour_clicked($event);">
+        </mwl-calendar-day-view>
+    </div>
+</div>
