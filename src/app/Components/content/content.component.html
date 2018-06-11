@@ -1,4 +1,13 @@
 <div class="container-fluid">
+    <!-- custom template -->
+    <ng-template #customCellTemplate let-day="day" let-locale="locale">
+        <div class="cal-cell-top">
+            <span class="cal-day-badge" *ngIf="day.badgeTotal > 0">{{ day.badgeTotal }}</span>
+            <span class="cal-day-number">{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span>
+        </div>
+        <span *ngIf="day.badgeTotal > 0" class="day-info"> {{ day.badgeTotal }} horas Trabajadas </span>
+    </ng-template>
+    <!--  Dialog -->
     <ng-template #modalContent let-c="close" let-d="dismiss">
         <div class="modal-header">
             <h4 class="modal-title">{{ periodMsg }}</h4>
@@ -32,18 +41,26 @@
             </div>
         </div>
         <div class="col-md-4 ">
-            <h2>{{ viewDate | date }}</h2>
-        </div>
-        <div class="col-md-4 " *ngIf="view == 'day'">
-            <button class="btn btn-outline-primary" (click)="view='month'">Mes</button>
-        </div>
 
+            <h2>{{ viewDate | date: 'd MMMM y' }}</h2>
+            <p>{{ hoursWorked }}</p>
+
+        </div>
+        <div class="col-md-4 ">
+            <div class="btn-group">
+                <button *ngIf="view == 'day' || view =='week'" class="btn btn-outline-primary" (click)="showView('month')"><i class="far fa-calendar"></i> Mes</button>
+                <button *ngIf="view == 'day' || view == 'month'" class="btn btn-outline-primary" (click)="showView('week')"><i class="far fa-calendar-alt"></i> Semana</button>
+                <button class="btn btn-outline-primary" [routerLink]="['/glosario']"><i class="fas fa-chart-bar"></i> Estadisticas</button>
+            </div>
+        </div>
     </div>
 
     <div [ngSwitch]="view">
-        <mwl-calendar-month-view *ngSwitchCase="'month'" [viewDate]="viewDate" [events]="events" (dayClicked)="dayClicked($event.day)">
+        <mwl-calendar-month-view *ngSwitchCase="'month'" [viewDate]="viewDate" [events]="events" [refresh]="refresh" [cellTemplate]="customCellTemplate" (beforeViewRender)="beforeMonthViewRender($event)" (dayClicked)="dayClicked($event.day)">
         </mwl-calendar-month-view>
-        <mwl-calendar-day-view *ngSwitchCase="'day'" [viewDate]="viewDate" [events]="events" (hourSegmentClicked)="hour_clicked($event);">
+        <mwl-calendar-week-view *ngSwitchCase="'week'" [viewDate]="viewDate" [events]="events" precision="minutes" [refresh]="refresh" (dayClicked)="dayClicked($event.day)">
+        </mwl-calendar-week-view>
+        <mwl-calendar-day-view *ngSwitchCase="'day'" [viewDate]="viewDate" [events]="events" [refresh]="refresh" [hourSegments]="4" (hourSegmentClicked)="hour_clicked($event);">
         </mwl-calendar-day-view>
     </div>
 </div>

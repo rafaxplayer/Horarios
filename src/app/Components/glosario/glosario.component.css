@@ -1,0 +1,13 @@
+.chars-wraped {}
+
+.char {
+    margin-top: 2rem;
+    padding: 1rem;
+    max-width: 50rem;
+}
+
+.char h2 {
+    text-align: center;
+    color: grey;
+    margin-bottom: 2rem;
+}

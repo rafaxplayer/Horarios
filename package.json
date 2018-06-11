@@ -22,8 +22,13 @@
         "@angular/router": "^6.0.3",
         "@ng-bootstrap/ng-bootstrap": "^2.0.0",
         "angular-calendar": "^0.25.2",
+        "angularfire2": "^5.0.0-rc.10",
         "core-js": "^2.5.4",
+        "firebase": "^5.0.4",
+        "ng2-charts": "^1.6.0",
+        "npm": "^6.1.0",
         "rxjs": "^6.0.0",
+        "sweetalert": "^2.1.0",
         "zone.js": "^0.8.26"
     },
     "devDependencies": {

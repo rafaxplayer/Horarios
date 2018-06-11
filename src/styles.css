@@ -3,3 +3,6 @@
 @import './assets/css/normalice.css';
 @import "./assets/css/bootstrap.min.css";
 @import "../node_modules/angular-calendar/css/angular-calendar.css";
+.navigation {
+    margin: 2rem;
+}

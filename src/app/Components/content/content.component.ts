@@ -1,16 +1,21 @@
-import { Component,  ViewChild,ChangeDetectionStrategy, TemplateRef, Input } from '@angular/core';
-import {addZeros} from '../helpers/helpers'
+import { Component,  OnInit,ViewChild, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
+import { addZeros, formatMinutes ,convertMinutesToHours} from '../helpers/helpers';
+import { FirebaseService } from '../../Services/firebase.service';
 import {
   isBefore,
-  isEqual
+  isEqual,
+  isValid,
+  isWithinRange,
+  isSameDay,
+  isSameWeek,
+  isSameMonth,
+  differenceInMinutes
   
 } from 'date-fns';
 
-import {
-  CalendarEvent,
-  CalendarEventAction,
-  CalendarEventTimesChangedEvent
-} from 'angular-calendar';
+import swal  from 'sweetalert';
+
+import { CalendarEvent, CalendarEventAction,CalendarMonthViewDay } from 'angular-calendar';
 
 import { Subject } from 'rxjs';
 
@@ -39,28 +44,54 @@ const colors: any = {
 })
 export class ContentComponent  {
 
-  @Input() periodMsg:string;
-  @Input() dateModal:string;
-  @Input() hourModal:string;
+  public periodMsg:string;
+  public dateModal:string;
+  public hourModal:string;
+  public events:CalendarEvent[]=[];
+  public view: string = 'month';
+  public viewDate: Date = new Date();
+
+  public hoursWorked:string = "00:00";
 
   @ViewChild('modalContent') modalContent: TemplateRef<any>;
-
-  view: string = 'month';
-
-  viewDate: Date = new Date();
 
   date:Date;
 
   startPeriod:boolean = true;
-
-  period:CalendarEvent ={
-
+ 
+  period:CalendarEvent={
     title:"",
-    start: new Date(),
-    end: new Date()
-    
+    start:new Date(),
+    end:new Date(),
+    color: colors.blue,
+    meta:{}
+          
   }
 
+  actions: CalendarEventAction[] = [
+    {
+      label: '<i class="fa fa-fw fa-times"></i>',
+      onClick: ({ event }: { event: CalendarEvent }): void => {
+       
+        swal({
+          title:'Eliminar Horario',
+          text:'¿Seguro quieres eliminar este horario?',
+          icon:'warning',
+          buttons:['Cancelar',true],
+          dangerMode: true
+          })
+          .then((willdelete)=>{
+            if(willdelete){
+              this.firebaseService.deleteHorario(event);
+              swal("Oh! Horario eliminado con exito!", {
+                icon: "success",
+              });
+            }
+        });
+        
+      }
+    }
+  ];
 
   getPeriodMsg():string{
     if(this.startPeriod){
@@ -89,108 +120,174 @@ export class ContentComponent  {
 
   refresh: Subject<any> = new Subject();
 
-  events: CalendarEvent[] = [
-    /* {
-      start: subDays(startOfDay(new Date()), 1),
-      end: addDays(new Date(), 1),
-      title: 'A 3 day event',
-      color: colors.red,
-      
-    },
-    {
-      start: startOfDay(new Date()),
-      title: 'An event with no end date',
-      color: colors.yellow,
-      
-    },
-    {
-      start: subDays(endOfMonth(new Date()), 3),
-      end: addDays(endOfMonth(new Date()), 3),
-      title: 'A long event that spans 2 months',
-      color: colors.blue
-    },
-    {
-      start: addHours(startOfDay(new Date()), 2),
-      end: new Date(),
-      title: 'A draggable and resizable event',
-      color: colors.yellow,
-      
-      resizable: {
-        beforeStart: true,
-        afterEnd: true
-      },
-      draggable: true
-    } */
-  ]; 
-  
-  constructor(private modal: NgbModal) {}
 
-  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
-    console.log(date);
-    console.log(events);
-    if(this.view == 'month'){
-      this.viewDate=date;
-      this.view = 'day';
-    } 
+  constructor(private modal: NgbModal,private firebaseService:FirebaseService) {}
+
+  ngOnInit() {
+// get events with firebase
     
+    this.firebaseService.getHorarios().snapshotChanges().subscribe(item => {
+      this.events = [];
+     item.forEach(element => {
+        //convert data to CalendarEvent format
+        let x = element.payload.toJSON();
+        
+        x["start"] = new Date(x["start"]);
+        x["end"] = new Date(x["end"]); 
+        x["actions"] = this.actions;
+        x["meta"] = {
+          id:element.key,
+          minutes:x["meta"]["minutes"]
+        }
+        this.events.push(x as CalendarEvent);
+        this.hoursWorked = this.horasTrabajadas('month');
+      });  
+      this.refresh.next();
+      
+    }); 
   }
 
+  // day click on month.... show day view
+  dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
+    if(this.view == 'month'){
+      this.viewDate = date;
+      this.view = 'day';
+      this.hoursWorked = this.horasTrabajadas('day');
+    } 
+  }
+
+  // show week view
+  showView(view:string){
+    this.view=view;
+    this.hoursWorked = this.horasTrabajadas(view);
+  }
+
+  // hour click on day view
   hour_clicked(event){
     this.date = new Date(event.date);
-    console.log(this.date);
     this.openModal();
+    
   }
-
+  
   openModal() {
-    this.periodMsg= this.getPeriodMsg();
-    this.dateModal= this.getFormatDate(this.date);
-    this.hourModal= this.getFormatHour(this.date);
+    this.periodMsg = this.getPeriodMsg();
+    this.dateModal = this.getFormatDate(this.date);
+    this.hourModal = this.getFormatHour(this.date);
     
     const modalRef = this.modal.open(this.modalContent,{ centered: true }).result.then((result) => {
       console.log( `Closed with: ${result}`);
     }, (reason) => {
       if(reason=='save'){
 
-        if(this.startPeriod){
-
-          this.period.start = this.date;
-          console.log('Start period',this.period);
-        }else{
-          let start = this.period.start;
-          if(isBefore(this.date,start) || isEqual(this.date,start)){
-            alert('El fin del horario no puede ser igual o antes del inicio de horario');
-            return;
-          }
-          console.log('Start and End period',this.period);
-
+        if(!isValid(this.date)){
+          swal('Error','El horario no es valido','error');
+          return;
         }
 
-        console.log('Saved period',this.period);
-        this.events.push(this.period);
-        console.log('Periods',this.events);
-        this.startPeriod = !this.startPeriod;
-        alert('saved');
+        if(this.startPeriod){
+          this.period.start = this.date;
+         
+          this.startPeriod = false;
+        }else{
+          
+          if(isBefore(this.date,this.period.start) || isEqual(this.date,this.period.start)){
+            swal('Error','El fin del horario no puede ser igual o antes del inicio de horario','error');
+            
+            return;
+          }
+          this.period.end = this.date;
+          let minutes = differenceInMinutes(this.period.end,this.period.start);
+          this.period.meta.minutes = minutes;
+          this.period.title = `${formatMinutes(minutes)} trabajados`;
+          
+          if(this.checkSchedulesOverlap(this.period, this.events)){
+            swal('Error',"Los hoarrios no se pueden solapar",'error');
+            this.startPeriod = true;
+            return;
+          }
+          this.firebaseService.addHorario(this.period);
+          this.refresh.next();
+          swal('Guardado!','Horario añadido','success');
+          this.startPeriod = true;
+          this.horasTrabajadas(this.view);
+        }
+        
       }
     });
     
   }
-  
 
-  
 
-  addEvent(): void {
-    /* this.events.push({
-      title: 'New event',
-      start: startOfDay(new Date()),
-      end: endOfDay(new Date()),
-      color: colors.red,
-      draggable: true,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true
-      }
-    }); */
-    this.refresh.next();
+
+  horasTrabajadas(view:string):string{
+
+    let ret="";
+    let horariosFilter = this.getEventsWithView(view);
+    if(horariosFilter){
+      let minutes = 0;
+      horariosFilter.forEach(element => {
+        //console.log(element.meta.minutes);
+        minutes = minutes + element.meta.minutes;
+        
+      });
+      ret = formatMinutes(minutes) + " Horas Trabajadas";
+    }else{
+      ret='No hai horas';
+    }
+    return ret;
   }
+
+  checkSchedulesOverlap(date:CalendarEvent,events:CalendarEvent[]):boolean{
+   
+    //get events today
+    let eventstoday = events.filter(iEvent => isSameDay(iEvent.start, date.start) );
+  
+    // get event today isWithinRange new period
+    let today = eventstoday.filter(iEvent => isWithinRange(date.start,iEvent.start,iEvent.end) || isWithinRange(date.end,iEvent.start,iEvent.end))
+    
+    // if iswithingrange return bolean
+    return (today.length > 0);
+  }
+
+  getEventsWithView(view:string):CalendarEvent[]{
+
+    let eventsFilter:CalendarEvent[];
+
+    switch(view){
+      case "day":
+      
+        eventsFilter = this.events.filter(iEvent => isSameDay(iEvent.start,this.viewDate));
+      break;
+      case "month":
+           
+        eventsFilter = this.events.filter(iEvent => isSameMonth(iEvent.start,this.viewDate));
+      break;
+      case "week":
+     
+        eventsFilter = this.events.filter(iEvent => isSameWeek(iEvent.start,this.viewDate));
+      break;
+      default:
+      
+        eventsFilter = this.events.filter(iEvent => isSameMonth(iEvent.start,this.viewDate));
+      
+    }
+    
+    return eventsFilter;
+      
+  }
+
+  beforeMonthViewRender({ body }: { body: CalendarMonthViewDay[] }): void {
+    body.forEach(day => {
+
+      let minutes:number=0;
+      day.events.forEach(event=>{
+        minutes=minutes+event.meta.minutes;
+      })
+
+      day.badgeTotal = convertMinutesToHours(minutes);
+     
+    });
+  }
+    
 
 }
