@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './Components/header/header.component';
 import { ContentComponent } from './Components/content/content.component';
 import { FooterComponent } from './Components/footer/footer.component';
+import { ChartsComponent } from './Components/charts/charts.component';
 
 //Animations
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -20,12 +21,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 // Firebase
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { FirebaseService } from './Services/firebase.service';
-import { GlosarioComponent } from './Components/glosario/glosario.component';
+
 
 //Char js
 import { ChartsModule } from 'ng2-charts';
+import { NotloginComponent } from './Components/notlogin/notlogin.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +36,8 @@ import { ChartsModule } from 'ng2-charts';
     HeaderComponent,
     ContentComponent,
     FooterComponent,
-    GlosarioComponent
+    ChartsComponent,
+    NotloginComponent
   ],
   imports: [
     BrowserModule,
@@ -42,6 +46,7 @@ import { ChartsModule } from 'ng2-charts';
     NgbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
+    AngularFireAuthModule,
     APP_ROUTING,
     ChartsModule
   ],

@@ -1,15 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component,Input} from '@angular/core';
+import { FirebaseService } from '../../Services/firebase.service';
+import { logging } from 'protractor';
 
 @Component({
   selector: 'app-header',
-  template: `<header><img class="logo" src="../../../assets/img/logo.png"/><h1 class='site-title'>Work Hours</h1></header>`,
+  templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
 
-  constructor() { }
+  @Input() authState:any;
 
-  ngOnInit() {
+  constructor(private firebaseservice:FirebaseService) {}
+
+  login():void{
+    this.firebaseservice.googleLogin();
   }
+  
+  logOut():void{
+    this.firebaseservice.signOut();
+  }
+  
 
 }

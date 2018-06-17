@@ -1,4 +1,4 @@
-import { Component,  OnInit,ViewChild, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
+import { Component,  OnInit, ViewChild, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
 import { addZeros, formatMinutes ,convertMinutesToHours} from '../helpers/helpers';
 import { FirebaseService } from '../../Services/firebase.service';
 import {
@@ -64,7 +64,10 @@ export class ContentComponent  {
     start:new Date(),
     end:new Date(),
     color: colors.blue,
-    meta:{}
+    meta:{
+      id:'',
+      minutes:0
+    }
           
   }
 
@@ -120,31 +123,24 @@ export class ContentComponent  {
 
   refresh: Subject<any> = new Subject();
 
-
   constructor(private modal: NgbModal,private firebaseService:FirebaseService) {}
 
   ngOnInit() {
-// get events with firebase
-    
+    // get events with firebase
     this.firebaseService.getHorarios().snapshotChanges().subscribe(item => {
       this.events = [];
-     item.forEach(element => {
-        //convert data to CalendarEvent format
-        let x = element.payload.toJSON();
+        item.forEach(element => {
+          let x = element.payload.toJSON();
+          x["start"] = new Date(x["start"]);
+          x["end"] = new Date(x["end"]); 
+          x["actions"] = this.actions;
+          this.events.push(x as CalendarEvent);
+          this.hoursWorked = this.horasTrabajadas('month');
+        });  
+        this.refresh.next();
         
-        x["start"] = new Date(x["start"]);
-        x["end"] = new Date(x["end"]); 
-        x["actions"] = this.actions;
-        x["meta"] = {
-          id:element.key,
-          minutes:x["meta"]["minutes"]
-        }
-        this.events.push(x as CalendarEvent);
-        this.hoursWorked = this.horasTrabajadas('month');
-      });  
-      this.refresh.next();
-      
     }); 
+      
   }
 
   // day click on month.... show day view
@@ -153,6 +149,7 @@ export class ContentComponent  {
       this.viewDate = date;
       this.view = 'day';
       this.hoursWorked = this.horasTrabajadas('day');
+      
     } 
   }
 
@@ -218,9 +215,7 @@ export class ContentComponent  {
   }
 
 
-
   horasTrabajadas(view:string):string{
-
     let ret="";
     let horariosFilter = this.getEventsWithView(view);
     if(horariosFilter){

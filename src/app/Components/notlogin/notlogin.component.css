@@ -1,0 +1,17 @@
+.not-login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+}
+
+.not-login button {
+    margin-top: 2rem;
+}
+
+.not-login .error-msg {
+    margin-top: 2rem;
+    color: red;
+    font-weight: 600;
+}

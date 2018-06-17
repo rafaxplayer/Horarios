@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy} from '@angular/core';
-import { isSameDay, isSameWeek, isSameMonth } from 'date-fns';
+import { isSameDay, isSameWeek, isSameMonth, isThisWeek } from 'date-fns';
 import { FirebaseService } from '../../Services/firebase.service';
 import { CalendarEvent } from 'calendar-utils';
 import { convertMinutesToHours } from '../helpers/helpers';
@@ -7,12 +7,12 @@ import { BaseChartDirective }  from 'ng2-charts/ng2-charts';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-glosario',
-  templateUrl: './glosario.component.html',
+  selector: 'app-charts',
+  templateUrl: './charts.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrls: ['./glosario.component.css']
+  styleUrls: ['./charts.component.css']
 })
-export class GlosarioComponent implements OnInit {
+export class ChartsComponent implements OnInit {
 
   @ViewChildren(BaseChartDirective) chartList: QueryList<BaseChartDirective>;
   
@@ -23,7 +23,7 @@ export class GlosarioComponent implements OnInit {
     responsive: true
   };
 
-  public charType ='bar';
+  public charType ='line';
   
   public barChartLegend:boolean = true;
 
@@ -32,13 +32,13 @@ export class GlosarioComponent implements OnInit {
   public barChartLabelsWeek:string[] = ['Domingo','Lunes','Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
       
   public barChartDataYear:Array<any> = [
-    {data:[], label:'Horas Mensuales'},
-    {data:[], label:'Horas Mes anterior'}
+    {data:[], label:'Horas este año'},
+    {data:[], label:'Horas año anterior'}
   ];
 
   public barChartDataWeek:Array<any> = [
-    {data:[], label:'Horas Diarias'},
-    {data:[], label:'Horas Semana anterior'}
+    {data:[], label:'Horas esta semana'},
+    {data:[], label:'Horas semana anterior'}
   ];
 
   date:Date= new Date();
@@ -71,7 +71,11 @@ export class GlosarioComponent implements OnInit {
   }
 
   updateChartYearHours(dataChartYear:Array<any>){
-    for( let i=0; i<12; i++ ){ dataChartYear[0].data.push(this.getMonthHours(this.horarios,i,this.date.getFullYear())); } 
+    for( let i=0; i<12; i++ ){ 
+      dataChartYear[0].data.push(this.getMonthHours(this.horarios,i,this.date.getFullYear())); 
+      dataChartYear[1].data.push(this.getMonthHours(this.horarios,i,this.date.getFullYear()-1));
+    } 
+
   }
 
   updateChartWeekHours(dataChartWeek:Array<any>){
@@ -101,13 +105,13 @@ export class GlosarioComponent implements OnInit {
   getDayHoursofThisWeek(data:CalendarEvent[],dayofWeek:number,year:number){
 
     let minutes = 0;
-    let daysOfThisWeek = data.filter(item => {
-      const itemDate = new Date(item.start);
-      return itemDate.getDay() == dayofWeek && isSameWeek(item.start, this.date) && itemDate.getFullYear() == year;
+    let daysOfThisWeek = data.filter( item => {
+      const itemDate = new Date( item.start );
+      return itemDate.getDay() == dayofWeek && isThisWeek( item.start ) && itemDate.getFullYear() == year;
     });
     
     if(daysOfThisWeek){
-      daysOfThisWeek.map(data=>{
+      daysOfThisWeek.map( data =>{
         minutes = minutes + data.meta.minutes;
       })
     }

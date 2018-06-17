@@ -1,0 +1,16 @@
+<header>
+    <img class="logo" src="../../../assets/img/logo.png" />
+    <h1 class='site-title'>Work Hours</h1>
+    <div class="user-panel">
+        <div class="user-info" *ngIf="authState">
+            <img class="user-img" src="{{authState.photoURL}}" alt="">
+            <div>
+                <span class="user-name">{{authState.displayName}}</span>
+                <span (click)="logOut()" class="user-logout">LogOut</span>
+            </div>
+        </div>
+        <div *ngIf="!authState">
+            <button (click)='login()' class="btn btn-sm btn-primary"><i class="far fa-user"></i> Login</button>
+        </div>
+    </div>
+</header>

@@ -1,11 +1,13 @@
 import { Routes, RouterModule } from '@angular/router';
 import { ContentComponent } from '../Components/content/content.component';
-import { GlosarioComponent } from '../Components/glosario/glosario.component';
+import { ChartsComponent } from '../Components/charts/charts.component';
+import { NotloginComponent } from '../Components/notlogin/notlogin.component';
 
 const APP_ROUTES: Routes = [
     
     { path: 'home', component: ContentComponent },
-    { path: 'glosario', component:  GlosarioComponent },
+    { path: 'charts', component: ChartsComponent },
+    { path: 'notlogin', component: NotloginComponent },
     { path: '**', component: ContentComponent }
 ];
 

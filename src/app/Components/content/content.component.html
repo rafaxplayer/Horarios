@@ -5,7 +5,7 @@
             <span class="cal-day-badge" *ngIf="day.badgeTotal > 0">{{ day.badgeTotal }}</span>
             <span class="cal-day-number">{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span>
         </div>
-        <span *ngIf="day.badgeTotal > 0" class="day-info"> {{ day.badgeTotal }} horas Trabajadas </span>
+        <span *ngIf="day.badgeTotal > 0" class="day-info"><i class="far fa-clock"></i> {{ day.badgeTotal }} horas Trabajadas </span>
     </ng-template>
     <!--  Dialog -->
     <ng-template #modalContent let-c="close" let-d="dismiss">
@@ -29,13 +29,13 @@
     <div class="navigation row text-center">
         <div class="col-md-4">
             <div class="btn-group">
-                <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+                <div class="btn btn-primary" mwlCalendarPreviousView [view]="view" [(viewDate)]="viewDate">
                     Previous
                 </div>
                 <div class="btn btn-outline-secondary" mwlCalendarToday [(viewDate)]="viewDate">
                     Today
                 </div>
-                <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate" (viewDateChange)="activeDayIsOpen = false">
+                <div class="btn btn-primary" mwlCalendarNextView [view]="view" [(viewDate)]="viewDate">
                     Next
                 </div>
             </div>
@@ -43,14 +43,14 @@
         <div class="col-md-4 ">
 
             <h2>{{ viewDate | date: 'd MMMM y' }}</h2>
-            <p>{{ hoursWorked }}</p>
+            <p><i class="far fa-clock"></i> {{ hoursWorked }}</p>
 
         </div>
         <div class="col-md-4 ">
             <div class="btn-group">
                 <button *ngIf="view == 'day' || view =='week'" class="btn btn-outline-primary" (click)="showView('month')"><i class="far fa-calendar"></i> Mes</button>
                 <button *ngIf="view == 'day' || view == 'month'" class="btn btn-outline-primary" (click)="showView('week')"><i class="far fa-calendar-alt"></i> Semana</button>
-                <button class="btn btn-outline-primary" [routerLink]="['/glosario']"><i class="fas fa-chart-bar"></i> Estadisticas</button>
+                <button class="btn btn-outline-primary" [routerLink]="['/charts']"><i class="fas fa-chart-bar"></i> Estadisticas</button>
             </div>
         </div>
     </div>
