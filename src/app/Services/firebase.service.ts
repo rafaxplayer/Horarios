@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { auth ,Observer} from 'firebase/app';
+import { auth } from 'firebase/app';
 import { CalendarEvent } from 'angular-calendar';
 
 import { Router } from "@angular/router";

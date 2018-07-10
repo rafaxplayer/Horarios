@@ -39,10 +39,10 @@ const colors: any = {
 @Component({
   selector: 'app-content',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './content.component.html',
-  styleUrls: ['./content.component.css']
+  templateUrl: './calendar.component.html',
+  styleUrls: ['./calendar.component.css']
 })
-export class ContentComponent  {
+export class CalendarComponent  {
 
   public periodMsg:string;
   public dateModal:string;
@@ -151,8 +151,9 @@ export class ContentComponent  {
       this.hoursWorked = this.horasTrabajadas('day');
       
     } 
+    
   }
-
+  
   // show week view
   showView(view:string){
     this.view=view;

@@ -1,15 +1,16 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule ,LOCALE_ID} from '@angular/core';
+import { NgModule } from '@angular/core';
 
 // Routas
 import { APP_ROUTING } from './Routes/app.routes';
 
 // Components
 import { AppComponent } from './app.component';
-import { HeaderComponent } from './Components/header/header.component';
-import { ContentComponent } from './Components/content/content.component';
-import { FooterComponent } from './Components/footer/footer.component';
+import { HeaderComponent } from './Components/shared/header/header.component';
+import { CalendarComponent } from './Components/calendar/calendar.component';
+import { FooterComponent } from './Components/shared/footer/footer.component';
 import { ChartsComponent } from './Components/charts/charts.component';
+import { NotloginComponent } from './Components/notlogin/notlogin.component';
 
 //Animations
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -28,13 +29,13 @@ import { FirebaseService } from './Services/firebase.service';
 
 //Char js
 import { ChartsModule } from 'ng2-charts';
-import { NotloginComponent } from './Components/notlogin/notlogin.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
-    ContentComponent,
+    CalendarComponent,
     FooterComponent,
     ChartsComponent,
     NotloginComponent
@@ -49,6 +50,7 @@ import { NotloginComponent } from './Components/notlogin/notlogin.component';
     AngularFireAuthModule,
     APP_ROUTING,
     ChartsModule
+    
   ],
   providers: [FirebaseService],
   bootstrap: [AppComponent]

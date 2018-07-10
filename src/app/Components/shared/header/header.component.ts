@@ -1,6 +1,6 @@
 import { Component,Input} from '@angular/core';
-import { FirebaseService } from '../../Services/firebase.service';
-import { logging } from 'protractor';
+import { FirebaseService } from '../../../Services/firebase.service';
+
 
 @Component({
   selector: 'app-header',

@@ -2,25 +2,27 @@
     <div class="navigation row text-center">
         <div class="row">
             <div class="col-md-4 text-left">
-                <a class="btn btn-outline-info" [routerLink]="['/home']"><i class="far fa-calendar"></i> Calendario</a>
+                <div class="btn-group">
+                    <a class="btn btn-outline-info" [routerLink]="['/home']"><i class="far fa-calendar"></i> Calendario</a>
+
+                    <select class="btn btn-danger dropdown-toggle" name="char-type" ([ngModel])="chartTypeSelected.value" (change)="chartChange($event)">
+                        <option>Char type</option>
+                        <option *ngFor="let type of chartTypes" [value]="type.id">{{type.value}}</option>
+                    </select>
+
+                </div>
             </div>
         </div>
     </div>
     <div class="chars-wraped">
         <div class="char">
             <h2>Horas Trabajadas esta semana</h2>
-
-            <canvas baseChart [datasets]="barChartDataWeek" [labels]="barChartLabelsWeek" [options]="barChartOptions" [legend]="barChartLegend" [chartType]="charType"></canvas>
-
+            <canvas baseChart [datasets]="barChartDataWeek" [labels]="barChartLabelsWeek" [options]="barChartOptions" [legend]="barChartLegend" [chartType]="chartType"></canvas>
         </div>
         <div class="char">
             <h2>Horas Trabajadas este año</h2>
-
-            <canvas baseChart [datasets]="barChartDataYear" [labels]="barChartLabelsYear" [options]="barChartOptions" [legend]="barChartLegend" [chartType]="charType"></canvas>
-
+            <canvas baseChart [datasets]="barChartDataYear" [labels]="barChartLabelsYear" [options]="barChartOptions" [legend]="barChartLegend" [chartType]="chartType"></canvas>
         </div>
-
-
     </div>
 
 </div>
