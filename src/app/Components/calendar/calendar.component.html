@@ -55,7 +55,7 @@
             <div class="btn-group">
                 <button *ngIf="view == 'day' || view =='week'" class="btn btn-outline-danger" (click)="showView('month')"><i class="far fa-calendar"></i> Mes</button>
                 <button *ngIf="view == 'day' || view == 'month'" class="btn btn-outline-danger" (click)="showView('week')"><i class="far fa-calendar-alt"></i> Semana</button>
-                <button class="btn btn-outline-danger" [routerLink]="['/charts']"><i class="fas fa-chart-bar"></i> Estadisticas</button>
+                <button class="btn btn-outline-danger" [routerLink]="['/charts',this.viewDate.toDateString()]"><i class="fas fa-chart-bar"></i> Estadisticas</button>
             </div>
         </div>
     </div>

@@ -6,3 +6,8 @@
 .navigation {
     margin: 2rem;
 }
+.cal-event-title{
+    padding:.8rem !important;
+    display:block;
+    background-color: aqua;
+}

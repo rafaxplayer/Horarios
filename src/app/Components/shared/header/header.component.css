@@ -7,13 +7,18 @@ header {
 }
 
 header .logo {
-    max-width: 60px;
+    max-width: 50px;
 }
 
-header h1 {
+header .site-branding {
     flex: 1;
 }
-
+header .site-branding .site-title {
+    padding: 1rem;
+    font-size: 1.5rem;
+    margin: 0; 
+    display: inline;
+}
 header .user-panel .user-info {
     display: flex;
     align-items: center;
@@ -36,8 +41,3 @@ header .user-panel .user-logout {
     cursor: pointer;
 }
 
-.site-title {
-    padding: 1rem;
-    font-size: 1.5rem;
-    margin: 0;
-}

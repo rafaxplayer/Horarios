@@ -6,7 +6,7 @@ import { NotloginComponent } from '../Components/notlogin/notlogin.component';
 const APP_ROUTES: Routes = [
     
     { path: 'home', component: CalendarComponent },
-    { path: 'charts', component: ChartsComponent },
+    { path: 'charts/:date', component: ChartsComponent },
     { path: 'notlogin', component: NotloginComponent },
     { path: '**', component: CalendarComponent }
 ];

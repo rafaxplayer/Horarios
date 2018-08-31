@@ -102,6 +102,7 @@ export class CalendarComponent  {
     }else{
       return 'Final del trabajo';
     }
+    
   }
 
   getFormatDate(date):string{
