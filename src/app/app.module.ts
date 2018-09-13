@@ -26,9 +26,15 @@ import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
 import { FirebaseService } from './Services/firebase.service';
 
-
 //Char js
 import { ChartsModule } from 'ng2-charts';
+
+//redux
+import { StoreModule } from '@ngrx/store';
+import { HorariosReducer } from './store/horarios/horarios.reducers';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { AppReducers } from './store/app.reducers';
+
 
 
 @NgModule({
@@ -49,9 +55,14 @@ import { ChartsModule } from 'ng2-charts';
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     APP_ROUTING,
-    ChartsModule
+    ChartsModule,
+    StoreModule.forRoot(AppReducers),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production, // Restrict extension to log-only mode
+    })
     
-  ],
+    ],
   providers: [FirebaseService],
   bootstrap: [AppComponent]
 })

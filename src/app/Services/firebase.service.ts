@@ -1,25 +1,25 @@
+
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { auth } from 'firebase/app';
 import { CalendarEvent } from 'angular-calendar';
-
 import { Router } from "@angular/router";
-
+import { Daytype } from '../interfaces/app.interfaces';
 
 @Injectable()
 export class FirebaseService {
 
   horarios: AngularFireList<any>;
 
+  tipos_dia: AngularFireList<any>;
+
   authState: any = null;
     
   constructor( private firebaseDatabase:AngularFireDatabase, private firebaseAuth:AngularFireAuth, private router:Router  ) { 
     this.firebaseAuth.authState.subscribe((auth) => {
       this.authState = auth;
-      
     });
-    
   }
 
   //Authentification
@@ -69,7 +69,7 @@ export class FirebaseService {
       .catch(error => console.log(error));
   }
 
- //// Sign Out ////
+ // Sign Out //
   signOut(): void {
 
     this.firebaseDatabase.createPushId
@@ -89,12 +89,26 @@ export class FirebaseService {
   addHorario( horario:CalendarEvent){
 
     horario.meta.id = this.firebaseDatabase.createPushId();
-    let newHorario = JSON.stringify(horario);
-    let ref = this.horarios.set(horario.meta.id,JSON.parse(newHorario));
+    let newData = JSON.stringify(horario);
+    return this.horarios.set(horario.meta.id,JSON.parse(newData));
     
   }
 
   deleteHorario(horario:CalendarEvent){
     this.horarios.remove(horario.meta.id);
   }
+
+  getDayTypes(){
+    return this.tipos_dia = this.firebaseDatabase.list('tipos_dia');
+  }
+
+  addDayType( daytype:Daytype, date:Date){
+    daytype.date = date.toDateString();
+    let newData = JSON.stringify(daytype);
+    console.log(daytype);
+    
+    return this.tipos_dia.set(daytype.date,JSON.parse(newData));
+    
+  }
+
 }

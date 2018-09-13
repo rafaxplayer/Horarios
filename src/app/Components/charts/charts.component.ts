@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy, ViewChildren, QueryList, OnDestroy} from '@angular/core';
-import { isWithinRange, isThisWeek, getDaysInMonth, isSameDay,subMonths } from 'date-fns';
+import { Component, OnInit, ChangeDetectionStrategy, ViewChildren, QueryList, ChangeDetectorRef} from '@angular/core';
+import { isWithinRange, isThisWeek,isSameYear, isSameMonth, subMonths, subYears } from 'date-fns';
 import { FirebaseService } from '../../Services/firebase.service';
 import { CalendarEvent } from 'calendar-utils';
 import { convertMinutesToHours } from '../helpers/helpers';
@@ -45,27 +45,34 @@ export class ChartsComponent implements OnInit {
     {data:[], label:'Horas año anterior'}
   ];
 
+  allHoursYear:number;
+
   public barChartDataMonth:Array<any>=[
     {data:[], label:'Horas este mes'},
     {data:[], label:'Horas mes anterior'}
   ];
+
+  allHoursMonth:number;
 
   public barChartDataWeek:Array<any> = [
     {data:[], label:'Horas esta semana'},
     {data:[], label:'Horas semana anterior'}
   ];
 
+  allHoursWeek:number;
+
   date:Date;
   
   horarios:CalendarEvent[]=[];
   
   firePromise:any;
-
+  
   chartTypeSelected:ChartType;
   
   constructor(
     private firebaseService:FirebaseService,
-    private route: ActivatedRoute) { 
+    private route: ActivatedRoute,
+    private changeRef:ChangeDetectorRef) { 
 
     this.chartTypes = [{id:'line',value:'Line'},{id:'bar',value:'Bar'},{id:'pie',value:'Pie'},{id:'radar',value:'Radar'},{id:'doughnut',value:'Doughnut'}]
 
@@ -73,34 +80,36 @@ export class ChartsComponent implements OnInit {
 
     this.chartType= this.chartTypeSelected.id;
 
+    this.allHoursMonth=0;
+    this.allHoursWeek=0;
+    this.allHoursYear = 0;
+
     let paramdate = this.route.snapshot.paramMap.get('date');
+    
+    this.date = paramdate ? new Date(paramdate) : new Date(); 
 
-    this.date= new Date(paramdate);
-
-    let numbersMonth = getDaysInMonth(this.date);
-
-    let arrayNumbers=[];
-
-    for(let i=0;i<numbersMonth;i++){
-      arrayNumbers.push( i + 1 )
+    console.log('param',this.date);
+       
+    for(let i = 1;i <= 31;i++){
+      this.barChartLabelsMonth.push( i )
     }
-
-    this.barChartLabelsMonth = arrayNumbers;
     
   }
   
   ngOnInit() {
-
+    
     this.firePromise = this.firebaseService.getHorarios().snapshotChanges().subscribe(item =>{
       item.forEach((data)=> {
         this.horarios.push(data.payload.val() as CalendarEvent) 
       });
-      this.updateChartYearHours( this.barChartDataYear );
-      this.updateChartWeekHours( this.barChartDataWeek );
-      this.updateChartMonthHours(this.barChartDataMonth );
+
+      this.updateChartMonthHours( this.barChartDataMonth, this.date );
+      this.updateChartYearHours( this.barChartDataYear, this.date );
+      this.updateChartWeekHours( this.barChartDataWeek, this.date );
+      
       this.updateCharts();
     });
-            
+   
   }
 
   
@@ -110,48 +119,51 @@ export class ChartsComponent implements OnInit {
 
   updateCharts(){
     this.chartList.forEach((child)=> child.chart.update() );
+    this.changeRef.detectChanges();
   }
 
-  updateChartYearHours(dataChartYear:Array<any>){
+  updateChartYearHours(dataChartYear:Array<any>,date:Date){
+    
     for( let i = 0; i < 12; i++ ){ 
-      dataChartYear[0].data.push(this.getMonthHours(this.horarios, i, this.date.getFullYear())); 
-      dataChartYear[1].data.push(this.getMonthHours(this.horarios, i, this.date.getFullYear()-1));
+      dataChartYear[0].data.push(this.getMonthHours(this.horarios, i, date)); 
+      dataChartYear[1].data.push(this.getMonthHours(this.horarios, i, subYears(date,1)));
     } 
-
+    
+    this.allHoursYear = this.countAllHours( dataChartYear[0].data );
+    
+    
   }
 
-  updateChartMonthHours(dataChartMonth:Array<any>){
-    let nDays = getDaysInMonth(this.date);
-    let datePreviousMonth= subMonths(this.date,1);
-    let nDayPreviousMonth = getDaysInMonth(datePreviousMonth);
-
-    for( let i = 0; i < nDays; i++){
-        dataChartMonth[0].data.push(this.getDayHours(this.horarios, i+1 ,this.date.getMonth(), this.date.getFullYear()));
-    }
-
-    for( let i = 0; i < nDayPreviousMonth; i++){
-      dataChartMonth[1].data.push(this.getDayHours(this.horarios, i+1 ,datePreviousMonth.getMonth(), datePreviousMonth.getFullYear()));
-    }
-
+  updateChartMonthHours(dataChartMonth:Array<any>,date:Date){
+   
+    let datePreviousMonth = subMonths(date,1);
+            
+    for( let i = 1; i <= 31; i++){
+        dataChartMonth[0].data.push(this.getDayHours(this.horarios, i ,date));
+        dataChartMonth[1].data.push(this.getDayHours(this.horarios, i ,datePreviousMonth));
+      }
+      this.allHoursMonth = this.countAllHours( dataChartMonth[0].data );
   }
 
-  updateChartWeekHours(dataChartWeek:Array<any>){
-    for( let i=0; i<7; i++){ 
-      dataChartWeek[0].data.push(this.getDayHoursofThisWeek(this.horarios, i, this.date.getFullYear(), true)); 
-      dataChartWeek[1].data.push(this.getDayHoursofThisWeek(this.horarios, i, this.date.getFullYear(), false)); 
+  updateChartWeekHours(dataChartWeek:Array<any>,date:Date){
+   
+    for( let i=0; i < 7; i++){ 
+      dataChartWeek[0].data.push(this.getDayHoursofTheWeek(this.horarios, i, date, true)); 
+      dataChartWeek[1].data.push(this.getDayHoursofTheWeek(this.horarios, i, date, false)); 
     }
-  
+    this.allHoursWeek = this.countAllHours( dataChartWeek[0].data );
   }
- 
-  getMonthHours(data:CalendarEvent[],month:number,year:number):number{
 
-    let minutes=0;
+   // get hours worked with month
+  getMonthHours(data:CalendarEvent[],month:number,date:Date):number{
+
+    let minutes = 0;
     let thisMonth = data.filter(item => {
       const itemDate = new Date(item.start);
-      return itemDate.getMonth() == month && itemDate.getFullYear() == year;
+      return itemDate.getMonth() == month && isSameYear(itemDate,date);
     });
     
-    if(thisMonth.length){
+    if(thisMonth.length > 0){
       thisMonth.map(data=>{
         minutes = minutes + data.meta.minutes;
 
@@ -160,27 +172,26 @@ export class ChartsComponent implements OnInit {
     return convertMinutesToHours(minutes);
   }
 
-  getDayHours(data:CalendarEvent[],day:number, month:number, year:number):number{
-    let minutes=0;
-    let dayMonth = data.filter(item => {
+  // get hours worked with day
+  getDayHours(data:CalendarEvent[],day:number,date:Date):number{
+
+    let minutes = 0;
+    let daysMonth = data.filter(item => {
       let itemDate = new Date(item.start);
-      return itemDate.getMonth() == month && itemDate.getFullYear() == year && itemDate.getDate() == day;
-     
+      return (isSameMonth(itemDate,date) && isSameYear(itemDate,date) && itemDate.getDate() == day);
     });
     
-    if(dayMonth.length){
-     
-      dayMonth.map(data=>{
+    if(daysMonth.length > 0){
+      daysMonth.map(data=>{
         minutes = minutes + data.meta.minutes;
-
       })
     }
     return convertMinutesToHours(minutes);
 
   }
 
-
-  getDayHoursofThisWeek(data:CalendarEvent[],dayofWeek:number,year:number,isThis:boolean){
+  // get hours worked with week
+  getDayHoursofTheWeek(data:CalendarEvent[],dayofWeek:number,date:Date,thisWeek?:boolean){
 
     let minutes = 0;
     let daysOfThisWeek = data.filter( item => {
@@ -188,18 +199,18 @@ export class ChartsComponent implements OnInit {
       const itemDate = new Date( item.start );
       let range = this.getRangePreviousWeek( this.date );
 
-      if(isThis){
+      if(thisWeek){
 
-        return itemDate.getDay() == dayofWeek && isThisWeek( itemDate  ) && itemDate.getFullYear() == year;
+        return itemDate.getDay() == dayofWeek && isThisWeek( itemDate  ) && isSameYear( itemDate, date );
 
       }else{
         
-        return itemDate.getDay() == dayofWeek && isWithinRange( itemDate , range.first, range.last ) && itemDate.getFullYear() == year;
+        return itemDate.getDay() == dayofWeek && isWithinRange( itemDate , range.first, range.last ) && isSameYear( itemDate, date );
       }
       
     });
     
-    if(daysOfThisWeek){
+    if(daysOfThisWeek.length > 0 ){
       daysOfThisWeek.map( data =>{
         minutes = minutes + data.meta.minutes;
       })
@@ -212,6 +223,7 @@ export class ChartsComponent implements OnInit {
       first:0,
       last:0
     };
+
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
@@ -224,6 +236,16 @@ export class ChartsComponent implements OnInit {
     return prevDatesWeek;
 
   }
+  
+  countAllHours(dataChar:any[]):number{
+    let numHours= 0;
+    dataChar.forEach(data => {
+      numHours = numHours + data
+    });
+        
+    return numHours;
+  }
+
 
   chartChange(event){
     if(event.target.value == 'Char type'){

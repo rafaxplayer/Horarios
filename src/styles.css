@@ -3,6 +3,19 @@
 @import './assets/css/normalice.css';
 @import "./assets/css/bootstrap.min.css";
 @import "../node_modules/angular-calendar/css/angular-calendar.css";
+@font-face{
+    font-family: Montserrat;
+    src: url('./assets/fonts/montserrat.woff2') format('woff2');
+    }
+
+body:not(i){
+    font-family: 'Montserrat' !important;
+}
+
+.site-title{
+    font-weight: 900;
+}
+
 .navigation {
     margin: 2rem;
 }
@@ -10,4 +23,36 @@
     padding:.8rem !important;
     display:block;
     background-color: aqua;
+}
+/* swall dialogs */
+.btn-dlg{
+    color:#e4f9f5;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    margin: 5px;
+}
+
+.btn-ok{
+    background-color: #6eb2be;
+}
+.btn-cancel{
+    background-color: #bb3939;
+}
+
+.swal2-container.swal2-shown {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* daytypes colors*/
+.whiteday{
+    background-color: white;
+    }
+
+.blueday{
+    background-color:#49dbf5;
+}
+.greenday{
+    background-color: #34f0d7;
 }
