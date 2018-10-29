@@ -1,7 +1,9 @@
-import { Component,Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FirebaseService } from '../../../Services/firebase.service';
-import { Store} from '@ngrx/store';
-import {AppState} from '../../../store/app.reducers'
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../store/app.reducers'
+import * as firebase from 'firebase';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -10,19 +12,27 @@ import {AppState} from '../../../store/app.reducers'
 })
 export class HeaderComponent {
 
-  authState:any;
+  authState: firebase.User;
 
-  constructor(private firebaseservice:FirebaseService,private store:Store<AppState>) {
-    store.select('user').subscribe(user => this.authState = user);
+  userSubscription: Subscription;
+
+  constructor(private firebaseservice: FirebaseService, private store: Store<AppState>) {
+    this.userSubscription = store.select('user')
+      .subscribe((user: firebase.User) => this.authState = user);
+
   }
 
-  login():void{
+  login(): void {
     this.firebaseservice.googleLogin();
   }
-  
-  logOut():void{
+
+  logOut(): void {
     this.firebaseservice.signOut();
   }
-  
+
+  ngOnDestroy(): void {
+    this.userSubscription.unsubscribe();
+    
+  }
 
 }

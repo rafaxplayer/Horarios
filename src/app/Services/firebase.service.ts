@@ -1,11 +1,19 @@
 
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore'
 import { AngularFireAuth } from 'angularfire2/auth';
-import { auth } from 'firebase/app';
+import { auth ,User} from 'firebase/app';
 import { CalendarEvent } from 'angular-calendar';
 import { Router } from "@angular/router";
 import { Daytype } from '../interfaces/app.interfaces';
+import { Store } from '@ngrx/store';
+import { AppState } from '../store/app.reducers';
+import { UserAction } from '../store/user/user.actions';
+import { HorariosAction } from '../store/horarios/horarios.actions'
+import { DayTypesListAction } from '../store/daytypes/daytypes.actions'
+import swal from 'sweetalert2';
+import { CalendarEventAction } from 'angular-calendar';
 
 @Injectable()
 export class FirebaseService {
@@ -14,19 +22,85 @@ export class FirebaseService {
 
   tipos_dia: AngularFireList<any>;
 
-  authState: any = null;
+  authState: User = null;
+
+  actions: CalendarEventAction[] = [
+    {
+      label: '<i class="fa fa-fw fa-times"></i>',
+      onClick: ({ event }: { event: CalendarEvent }): void => {
+       
+       swal({
+          title:'Eliminar Horario',
+          text:'¿Seguro quieres eliminar este horario?',
+          type:'warning',
+          showCancelButton:true,
+          confirmButtonText: 'SI',
+          cancelButtonText: 'CANCELAR',
+          reverseButtons: true
+          })
+          .then((willdelete)=>{
+            if(willdelete.value){
+              this.deleteHorario(event);
+              swal("Ok!"," Horario eliminado con exito!","success");
+            } 
+        });
+        
+      }
+    }
+  ];
     
-  constructor( private firebaseDatabase:AngularFireDatabase, private firebaseAuth:AngularFireAuth, private router:Router  ) { 
+  constructor(private firebaseDatabase:AngularFireDatabase, 
+              private firebaseAuth:AngularFireAuth,
+              private firestoreDatabase:AngularFirestore, 
+              private router:Router,
+              private store:Store<AppState> ) {}
+
+  
+//init services
+  initializeAuth(){
     this.firebaseAuth.authState.subscribe((auth) => {
       this.authState = auth;
+      const action = new UserAction(auth);
+      this.store.dispatch(action);
+      
     });
   }
 
-  //Authentification
+  initializeHorarios(){
+    this.getHorarios().snapshotChanges().subscribe(item => {
+      let events = [];
+        item.forEach(element => {
+          let x = element.payload.toJSON();
+          x["start"] = new Date(x["start"]);
+          x["end"] = new Date(x["end"]); 
+          x["actions"] = this.actions;
+          events.push(x as CalendarEvent);
+          
+        }); 
+        const action = new HorariosAction(events);
+        this.store.dispatch(action); 
+                
+    })
+  }
 
+  initializeTiposDia(){
+    this.getDayTypes().snapshotChanges().subscribe(item => {
+      let daytypes=[];
+        item.forEach(element => {
+             daytypes.push(element.payload.val());
+        }); 
+
+        const action = new DayTypesListAction(daytypes);
+        this.store.dispatch(action); 
+                
+    });  
+  }
+
+
+  //Authentification
   // Returns true if user is logged in
-   authenticated(): boolean {
-    return this.authState !== null;
+   authenticated() {
+    this.authState != null;
   }
 
   // Returns current user data
@@ -71,7 +145,6 @@ export class FirebaseService {
 
  // Sign Out //
   signOut(): void {
-
     this.firebaseDatabase.createPushId
     this.firebaseAuth.auth.signOut();
     this.router.navigate(['/notLogin'])
@@ -90,6 +163,9 @@ export class FirebaseService {
 
     horario.meta.id = this.firebaseDatabase.createPushId();
     let newData = JSON.stringify(horario);
+    this.firestoreDatabase.doc(`${this.authState.uid.toString()}/horarios`).set(JSON.parse(newData))
+        .then(()=>console.log('ok'))
+    
     return this.horarios.set(horario.meta.id,JSON.parse(newData));
     
   }

@@ -7,14 +7,14 @@ import { Component } from '@angular/core';
 })
 export class FooterComponent {
 
-  anio:number;
-  authorName:string;
+  anio: number;
+  authorName: string;
 
-  constructor() { 
-    this.anio= new Date().getFullYear();
-    this.authorName= "J.Rafael Simarro";
+  constructor() {
+    this.anio = new Date().getFullYear();
+    this.authorName = "J.Rafael Simarro";
   }
 
-  
+
 
 }

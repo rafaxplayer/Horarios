@@ -1,3 +1,4 @@
+
 export interface Daytype{
     color:string;
     value:string;

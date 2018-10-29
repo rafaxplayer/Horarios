@@ -13,15 +13,8 @@ export class NotloginComponent implements OnInit {
   errormsg:string;
 
   constructor(private _router:Router,private firebaseservice:FirebaseService) { }
-  //this._router.navigate(['home']);
-  ngOnInit() {
-    
-      if(this.firebaseservice.authenticated()){
-        
-      }
-    
-    
-  }
+  
+  ngOnInit() {}
 
   goHome(){
     if(this.firebaseservice.authenticated()){

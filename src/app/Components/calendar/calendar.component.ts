@@ -144,8 +144,7 @@ export class CalendarComponent {
 
       this.events = data.horarios;
       this.dayTypes = data.dayTypes.list
-      //console.log(data.daytypes_list);
-
+      
       this.refresh.next();
     })
 
@@ -176,11 +175,17 @@ export class CalendarComponent {
   // hour click on day view
   hour_clicked(event) {
     this.date = new Date(event.date);
-    this.openModal();
+    this.setHorarioDlg();
 
   }
 
-  openModal() {
+  setHorarioDlg() {
+
+    if(this.dayType.value != 'worked'){
+      swal('Error', 'No se pueden añadir horarios a un dia de fiesta o vacaciones, cambia el tipo de dia', 'error');
+      return;
+    }
+
     this.periodMsg = this.getPeriodMsg();
     this.dateModal = this.getFormatDate(this.date);
     this.hourModal = this.getFormatHour(this.date);

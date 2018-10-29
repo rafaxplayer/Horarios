@@ -8,7 +8,7 @@
         <div class="user-info" *ngIf="authState">
             <img class="user-img" src="{{ authState.photoURL }}" alt="">
             <div>
-                <span class="user-name">{{authState.displayName}}</span>
+                <span class="user-name">{{ authState.displayName }}</span>
                 <span (click)="logOut()" class="user-logout">Salir</span>
             </div>
         </div>

@@ -9,7 +9,7 @@
     }
 
 body:not(i){
-    font-family: 'Montserrat' !important;
+    font-family: 'Montserrat'!important;
 }
 
 .site-title{
@@ -56,3 +56,7 @@ body:not(i){
 .greenday{
     background-color: #34f0d7;
 }
+.cal-day-view .cal-hour-segment.cal-after-hour-start .cal-time {
+    display: block !important;
+    font-size: .8rem;
+  }

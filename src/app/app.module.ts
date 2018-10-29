@@ -16,13 +16,14 @@ import { NotloginComponent } from './Components/notlogin/notlogin.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 //Angular-calendar
-import { CalendarModule } from 'angular-calendar';
+import { CalendarModule, CalendarNativeDateFormatter, CalendarDateFormatter, DateFormatterParams } from 'angular-calendar';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 // Firebase
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { environment } from '../environments/environment';
 import { FirebaseService } from './Services/firebase.service';
 
@@ -31,11 +32,19 @@ import { ChartsModule } from 'ng2-charts';
 
 //redux
 import { StoreModule } from '@ngrx/store';
-import { HorariosReducer } from './store/horarios/horarios.reducers';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { AppReducers } from './store/app.reducers';
 
+class CustomDateFormatter extends CalendarNativeDateFormatter {
 
+  public dayViewHour({date, locale}: DateFormatterParams): string {
+    return new Intl.DateTimeFormat('ca', {
+      hour: 'numeric',
+      minute: 'numeric'
+    }).format(date);
+  }
+
+}
 
 @NgModule({
   declarations: [
@@ -49,11 +58,17 @@ import { AppReducers } from './store/app.reducers';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    CalendarModule.forRoot(),
+    CalendarModule.forRoot({
+      dateFormatter: {
+        provide: CalendarDateFormatter, 
+        useClass: CustomDateFormatter
+      }
+    }),
     NgbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
+    AngularFirestoreModule,
     APP_ROUTING,
     ChartsModule,
     StoreModule.forRoot(AppReducers),
